@@ -174,8 +174,10 @@ QmfStorageManager::QmfStorageManager(QObject *parent)
     }
 
     if (QMailStore *store = QMailStore::instance()) {
-        connect(store, SIGNAL(accountsUpdated(QMailAccountIdList)), this, SLOT(clearAccountPath(QMailAccountIdList)));
-        connect(store, SIGNAL(accountsRemoved(QMailAccountIdList)), this, SLOT(clearAccountPath(QMailAccountIdList)));
+        connect(store, &QMailStore::accountsUpdated,
+                this, &QmfStorageManager::clearAccountPath);
+        connect(store, &QMailStore::accountsRemoved,
+                this, &QmfStorageManager::clearAccountPath);
     }
 }
 

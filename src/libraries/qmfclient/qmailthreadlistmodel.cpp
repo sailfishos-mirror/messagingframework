@@ -198,18 +198,12 @@ QMailThreadListModel::QMailThreadListModel(QObject* parent)
     QAbstractListModel(parent),
     d(new QMailThreadListModelPrivate(QMailThreadKey(), QMailThreadSortKey(), true))
 {
-    connect(QMailStore::instance(),
-            SIGNAL(threadsAdded(QMailThreadIdList)),
-            this,
-            SLOT(threadsAdded(QMailThreadIdList)));
-    connect(QMailStore::instance(),
-            SIGNAL(threadsRemoved(QMailThreadIdList)),
-            this,
-            SLOT(threadsRemoved(QMailThreadIdList)));
-    connect(QMailStore::instance(),
-            SIGNAL(threadsUpdated(QMailThreadIdList)),
-            this,
-            SLOT(threadsUpdated(QMailThreadIdList)));
+    connect(QMailStore::instance(), &QMailStore::threadsAdded,
+            this, &QMailThreadListModel::threadsAdded);
+    connect(QMailStore::instance(), &QMailStore::threadsRemoved,
+            this, &QMailThreadListModel::threadsRemoved);
+    connect(QMailStore::instance(), &QMailStore::threadsUpdated,
+            this, &QMailThreadListModel::threadsUpdated);
 }
 
 /*!

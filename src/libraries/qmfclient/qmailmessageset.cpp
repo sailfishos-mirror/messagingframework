@@ -529,12 +529,16 @@ void QMailFolderMessageSet::init()
             // Add items for any child folders
             synchronizeChildren();
 
-            connect(model(), SIGNAL(foldersAdded(QMailFolderIdList)), this, SLOT(foldersAdded(QMailFolderIdList)));
-            connect(model(), SIGNAL(foldersRemoved(QMailFolderIdList)), this, SLOT(foldersRemoved(QMailFolderIdList)));
+            connect(model(), &QMailMessageSetModel::foldersAdded,
+                    this, &QMailFolderMessageSet::foldersAdded);
+            connect(model(), &QMailMessageSetModel::foldersRemoved,
+                    this, &QMailFolderMessageSet::foldersRemoved);
         }
 
-        connect(model(), SIGNAL(foldersUpdated(QMailFolderIdList)), this, SLOT(foldersUpdated(QMailFolderIdList)));
-        connect(model(), SIGNAL(folderContentsModified(QMailFolderIdList)), this, SLOT(folderContentsModified(QMailFolderIdList)));
+        connect(model(), &QMailMessageSetModel::foldersUpdated,
+                this, &QMailFolderMessageSet::foldersUpdated);
+        connect(model(), &QMailMessageSetModel::folderContentsModified,
+                this, &QMailFolderMessageSet::folderContentsModified);
     }
 }
 
@@ -780,13 +784,18 @@ void QMailAccountMessageSet::init()
             // Add items for any child folders
             synchronizeChildren();
 
-            connect(model(), SIGNAL(foldersAdded(QMailFolderIdList)), this, SLOT(foldersAdded(QMailFolderIdList)));
-            connect(model(), SIGNAL(foldersRemoved(QMailFolderIdList)), this, SLOT(foldersRemoved(QMailFolderIdList)));
-            connect(model(), SIGNAL(foldersUpdated(QMailFolderIdList)), this, SLOT(foldersUpdated(QMailFolderIdList)));
+            connect(model(), &QMailMessageSetModel::foldersAdded,
+                    this, &QMailAccountMessageSet::foldersAdded);
+            connect(model(), &QMailMessageSetModel::foldersRemoved,
+                    this, &QMailAccountMessageSet::foldersRemoved);
+            connect(model(), &QMailMessageSetModel::foldersUpdated,
+                    this, &QMailAccountMessageSet::foldersUpdated);
         }
 
-        connect(model(), SIGNAL(accountsUpdated(QMailAccountIdList)), this, SLOT(accountsUpdated(QMailAccountIdList)));
-        connect(model(), SIGNAL(accountContentsModified(QMailAccountIdList)), this, SLOT(accountContentsModified(QMailAccountIdList)));
+        connect(model(), &QMailMessageSetModel::accountsUpdated,
+                this, &QMailAccountMessageSet::accountsUpdated);
+        connect(model(), &QMailMessageSetModel::accountContentsModified,
+                this, &QMailAccountMessageSet::accountContentsModified);
     }
 }
 
@@ -1083,22 +1092,30 @@ void QMailFilterMessageSet::reset()
     Q_D(QMailFilterMessageSet);
 
     if (d->_minimized) {
-        disconnect(model(), SIGNAL(folderContentsModified(QMailFolderIdList)), this, SLOT(folderContentsModified(QMailFolderIdList)));
+        disconnect(model(), &QMailMessageSetModel::folderContentsModified,
+                   this, &QMailFilterMessageSet::folderContentsModified);
 
         const QMailMessageIdList ids = QMailStore::instance()->queryMessages(messageKey());
         d->_messageIds = QSet<QMailMessageId>(ids.constBegin(), ids.constEnd());
 
-        connect(model(), SIGNAL(messagesAdded(QMailMessageIdList)), this, SLOT(messagesAdded(QMailMessageIdList)));
-        connect(model(), SIGNAL(messagesRemoved(QMailMessageIdList)), this, SLOT(messagesRemoved(QMailMessageIdList)));
-        connect(model(), SIGNAL(messagesUpdated(QMailMessageIdList)), this, SLOT(messagesUpdated(QMailMessageIdList)));
+        connect(model(), &QMailMessageSetModel::messagesAdded,
+                this, &QMailFilterMessageSet::messagesAdded);
+        connect(model(), &QMailMessageSetModel::messagesRemoved,
+                this, &QMailFilterMessageSet::messagesRemoved);
+        connect(model(), &QMailMessageSetModel::messagesUpdated,
+                this, &QMailFilterMessageSet::messagesUpdated);
     } else {
-        disconnect(model(), SIGNAL(messagesAdded(QMailMessageIdList)), this, SLOT(messagesAdded(QMailMessageIdList)));
-        disconnect(model(), SIGNAL(messagesRemoved(QMailMessageIdList)), this, SLOT(messagesRemoved(QMailMessageIdList)));
-        disconnect(model(), SIGNAL(messagesUpdated(QMailMessageIdList)), this, SLOT(messagesUpdated(QMailMessageIdList)));
+        disconnect(model(), &QMailMessageSetModel::messagesAdded,
+                   this, &QMailFilterMessageSet::messagesAdded);
+        disconnect(model(), &QMailMessageSetModel::messagesRemoved,
+                   this, &QMailFilterMessageSet::messagesRemoved);
+        disconnect(model(), &QMailMessageSetModel::messagesUpdated,
+                   this, &QMailFilterMessageSet::messagesUpdated);
 
         d->_messageIds.clear();
 
-        connect(model(), SIGNAL(folderContentsModified(QMailFolderIdList)), this, SLOT(folderContentsModified(QMailFolderIdList)));
+        connect(model(), &QMailMessageSetModel::folderContentsModified,
+                this, &QMailFilterMessageSet::folderContentsModified);
     }
 }
 
@@ -1416,19 +1433,30 @@ void QMailMessageSetModel::ceasePropagatingUpdates()
 void QMailMessageSetModel::delayedInit()
 {
     if (QMailStore* store = QMailStore::instance()) {
-        connect(store, SIGNAL(accountsAdded(QMailAccountIdList)), this, SLOT(mailStoreAccountsAdded(QMailAccountIdList)));
-        connect(store, SIGNAL(accountsRemoved(QMailAccountIdList)), this, SLOT(mailStoreAccountsRemoved(QMailAccountIdList)));
-        connect(store, SIGNAL(accountsUpdated(QMailAccountIdList)), this, SLOT(mailStoreAccountsUpdated(QMailAccountIdList)));
-        connect(store, SIGNAL(accountContentsModified(QMailAccountIdList)), this, SLOT(mailStoreAccountContentsModified(QMailAccountIdList)));
+        connect(store, &QMailStore::accountsAdded,
+                this, &QMailMessageSetModel::mailStoreAccountsAdded);
+        connect(store, &QMailStore::accountsRemoved,
+                this, &QMailMessageSetModel::mailStoreAccountsRemoved);
+        connect(store, &QMailStore::accountsUpdated,
+                this, &QMailMessageSetModel::mailStoreAccountsUpdated);
+        connect(store, &QMailStore::accountContentsModified,
+                this, &QMailMessageSetModel::mailStoreAccountContentsModified);
 
-        connect(store, SIGNAL(foldersAdded(QMailFolderIdList)), this, SLOT(mailStoreFoldersAdded(QMailFolderIdList)));
-        connect(store, SIGNAL(foldersRemoved(QMailFolderIdList)), this, SLOT(mailStoreFoldersRemoved(QMailFolderIdList)));
-        connect(store, SIGNAL(foldersUpdated(QMailFolderIdList)), this, SLOT(mailStoreFoldersUpdated(QMailFolderIdList)));
-        connect(store, SIGNAL(folderContentsModified(QMailFolderIdList)), this, SLOT(mailStoreFolderContentsModified(QMailFolderIdList)));
+        connect(store, &QMailStore::foldersAdded,
+                this, &QMailMessageSetModel::mailStoreFoldersAdded);
+        connect(store, &QMailStore::foldersRemoved,
+                this, &QMailMessageSetModel::mailStoreFoldersRemoved);
+        connect(store, &QMailStore::foldersUpdated,
+                this, &QMailMessageSetModel::mailStoreFoldersUpdated);
+        connect(store, &QMailStore::folderContentsModified,
+                this, &QMailMessageSetModel::mailStoreFolderContentsModified);
 
-        connect(store, SIGNAL(messagesAdded(QMailMessageIdList)), this, SLOT(mailStoreMessagesAdded(QMailMessageIdList)));
-        connect(store, SIGNAL(messagesRemoved(QMailMessageIdList)), this, SLOT(mailStoreMessagesRemoved(QMailMessageIdList)));
-        connect(store, SIGNAL(messagesUpdated(QMailMessageIdList)), this, SLOT(mailStoreMessagesUpdated(QMailMessageIdList)));
+        connect(store, &QMailStore::messagesAdded,
+                this, &QMailMessageSetModel::mailStoreMessagesAdded);
+        connect(store, &QMailStore::messagesRemoved,
+                this, &QMailMessageSetModel::mailStoreMessagesRemoved);
+        connect(store, &QMailStore::messagesUpdated,
+                this, &QMailMessageSetModel::mailStoreMessagesUpdated);
     }
 }
 

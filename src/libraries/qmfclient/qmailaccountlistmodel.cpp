@@ -194,18 +194,12 @@ QMailAccountListModel::QMailAccountListModel(QObject* parent)
     : QAbstractListModel(parent)
     , d(new QMailAccountListModelPrivate(QMailAccountKey(), QMailAccountSortKey(), true))
 {
-    connect(QMailStore::instance(),
-            SIGNAL(accountsAdded(QMailAccountIdList)),
-            this,
-            SLOT(accountsAdded(QMailAccountIdList)));
-    connect(QMailStore::instance(),
-            SIGNAL(accountsRemoved(QMailAccountIdList)),
-            this,
-            SLOT(accountsRemoved(QMailAccountIdList)));
-    connect(QMailStore::instance(),
-            SIGNAL(accountsUpdated(QMailAccountIdList)),
-            this,
-            SLOT(accountsUpdated(QMailAccountIdList)));
+    connect(QMailStore::instance(), &QMailStore::accountsAdded,
+            this, &QMailAccountListModel::accountsAdded);
+    connect(QMailStore::instance(), &QMailStore::accountsRemoved,
+            this, &QMailAccountListModel::accountsRemoved);
+    connect(QMailStore::instance(), &QMailStore::accountsUpdated,
+            this, &QMailAccountListModel::accountsUpdated);
 }
 
 /*!

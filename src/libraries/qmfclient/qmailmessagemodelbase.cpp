@@ -141,9 +141,12 @@ QMailMessageModelImplementation::~QMailMessageModelImplementation()
 QMailMessageModelBase::QMailMessageModelBase(QObject* parent)
     : QAbstractItemModel(parent)
 {
-    connect(QMailStore::instance(), SIGNAL(messagesAdded(QMailMessageIdList)), this, SLOT(messagesAdded(QMailMessageIdList)));
-    connect(QMailStore::instance(), SIGNAL(messagesRemoved(QMailMessageIdList)), this, SLOT(messagesRemoved(QMailMessageIdList)));
-    connect(QMailStore::instance(), SIGNAL(messagesUpdated(QMailMessageIdList)), this, SLOT(messagesUpdated(QMailMessageIdList)));
+    connect(QMailStore::instance(), &QMailStore::messagesAdded,
+            this, &QMailMessageModelBase::messagesAdded);
+    connect(QMailStore::instance(), &QMailStore::messagesRemoved,
+            this, &QMailMessageModelBase::messagesRemoved);
+    connect(QMailStore::instance(), &QMailStore::messagesUpdated,
+            this, &QMailMessageModelBase::messagesUpdated);
 }
 
 /*! \internal */

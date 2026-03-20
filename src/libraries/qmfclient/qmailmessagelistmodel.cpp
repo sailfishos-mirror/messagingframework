@@ -438,7 +438,8 @@ bool QMailMessageListModelPrivate::updateMessages(const QMailMessageIdList &ids)
 
                 // See if this item is still sorted correctly with respect to its neighbours
                 if (newIndex >= _idList.count()) {
-                    qCWarning(lcMessaging) << "QMailMessageListModelPrivate::updateMessage index out of bounds" << newIndex << _idList.count();
+                    qCWarning(lcMessaging) << "QMailMessageListModelPrivate::updateMessage index out of bounds"
+                                           << newIndex << _idList.count();
                 } else if (newIndex > 0) {
                     if (newIds.indexOf(_idList.at(newIndex - 1)) > newIndex) {
                         reinsert = true;
@@ -492,7 +493,8 @@ bool QMailMessageListModelPrivate::updateMessages(const QMailMessageIdList &ids)
 
     std::sort(updateIndices.begin(), updateIndices.end());
     foreach (int index, updateIndices) {
-        _model.emitDataChanged(_model.index(index, 0, QModelIndex()), _model.index(index, _model.columnCount() - 1, QModelIndex()));
+        _model.emitDataChanged(_model.index(index, 0, QModelIndex()),
+                               _model.index(index, _model.columnCount() - 1, QModelIndex()));
     }
 
     return true;
