@@ -1689,8 +1689,7 @@ void QMailMessageHeaderFieldPrivate::parse(const QByteArray& text, bool structur
             if (_id.isEmpty()) {
                 _id = QByteArray(token, (it - token)).trimmed();
                 token = (it + 1);
-            }
-            else if (_structured) {
+            } else if (_structured) {
                 // If this is a structured header, there can be only one colon
                 token = (it + 1);
             }
@@ -1733,8 +1732,6 @@ void QMailMessageHeaderFieldPrivate::parse(const QByteArray& text, bool structur
 
             if (!name.isEmpty() && !value.isEmpty())
                 addParameter(name, value);
-        } else if (_structured) {
-            malformed = true;
         }
     }
 }
@@ -4012,6 +4009,12 @@ const QMailMessagePart& QMailMessagePartContainerPrivate::partAt(const QMailMess
     }
 
     Q_ASSERT(part);
+    if (!part) {
+        qCWarning(lcMessaging) << Q_FUNC_INFO << "No QMailMessagePart found, this shouldn't happen";
+        static QMailMessagePart errorPart;
+        return errorPart;
+    }
+
     return *part;
 }
 
@@ -4028,6 +4031,12 @@ QMailMessagePart& QMailMessagePartContainerPrivate::partAt(const QMailMessagePar
             qCWarning(lcMessaging) << Q_FUNC_INFO << "Invalid index, container does not have a part at " << index;
             Q_ASSERT(false);
         }
+    }
+
+    if (!part) {
+        qCWarning(lcMessaging) << Q_FUNC_INFO << "No QMailMessagePart found, this shouldn't happen";
+        static QMailMessagePart errorPart;
+        return errorPart;
     }
 
     return *part;
@@ -8509,10 +8518,10 @@ struct ChunkStore
 {
     QList<QMailMessage::MessageChunk> chunks;
     QByteArray chunk;
-    QDataStream *ds;
+    QDataStream ds;
 
     ChunkStore()
-        : ds(new QDataStream(&chunk, QIODevice::WriteOnly | QIODevice::Unbuffered))
+        : ds(&chunk, QIODevice::WriteOnly | QIODevice::Unbuffered)
     {
     }
 
@@ -8523,24 +8532,16 @@ struct ChunkStore
 
     void close()
     {
-        if (ds) {
-            delete ds;
-            ds = nullptr;
-
-            if (!chunk.isEmpty()) {
-                chunks.append(qMakePair(QMailMessage::Text, chunk));
-            }
+        if (!chunk.isEmpty()) {
+            chunks.append(qMakePair(QMailMessage::Text, chunk));
         }
     }
 
     void operator()(QMailMessage::ChunkType type)
     {
         // This chunk is now complete
-        delete ds;
         chunks.append(qMakePair(type, chunk));
-
         chunk.clear();
-        ds = new QDataStream(&chunk, QIODevice::WriteOnly | QIODevice::Unbuffered);
     }
 };
 
@@ -8553,7 +8554,7 @@ QList<QMailMessage::MessageChunk> QMailMessage::toRfc2822Chunks(EncodingFormat f
 {
     ChunkStore store;
 
-    partContainerImpl()->toRfc2822<ChunkStore>(store.ds, format, status(), &store);
+    partContainerImpl()->toRfc2822<ChunkStore>(&store.ds, format, status(), &store);
     store.close();
 
     return store.chunks;
